@@ -75,24 +75,18 @@ measures:
   - id: pnc
     group: Immigration
     name: Supprimer les aides non contributives aux étrangers (APL, allocations de la CAF, RSA…)
-    sponsors: Sarah Knafo ; version restreinte au RN
-    note: Réserver des prestations aux Français est jugé contraire à la Constitution en l'état.
+    sponsors: Sarah Knafo
+    note: >-
+      Estimation indépendante (≈ 9 Md€) ; la candidate avance 15 à 20 Md€, chiffre contesté.
+      Réserver des prestations aux Français est jugé contraire à la Constitution en l'état.
     sources:
       - label: Les Surligneurs
         url: https://lessurligneurs.eu/prestations-sociales-ame-energies-renouvelables-pourquoi-les-mesures-deconomies-de-sarah-knafo-sont-juridiquement-incertaines/
     variants:
-      - id: cnaf
-        label: ≈ 9 Md€ — estimation fondée sur les données Cnaf
+      - id: default
+        label: ≈ 9 Md€ par an — estimation fondée sur les données Cnaf
         budget_bn: 9
         badge: { level: ok, label: Estimation indépendante }
-      - id: knafo
-        label: 15 à 20 Md€ — chiffrage Knafo (contesté)
-        budget_bn: 17.5
-        badge: { level: warn, label: "Chiffrage du candidat (15 à 20 Md€, contesté)" }
-      - id: rn
-        label: 6,1 Md€ — version RN (moins de 5 ans de travail)
-        budget_bn: 6.1
-        badge: { level: warn, label: Chiffrage du parti }
 
   - id: apd
     group: Autres dépenses

@@ -56,14 +56,14 @@ def _scenarios(catalog: Catalog) -> list[tuple[str, Scenario]]:
     )
     cases.append(
         (
-            "e10 tout, variantes max, prix 2.60",
+            "e10 tout, variante FP 1997, prix 2.60",
             Scenario(
                 fuel="e10",
                 start_price=2.60,
                 selections=[
                     SelectedMeasure(
                         measure_id=i,
-                        variant_id=("knafo" if i == "pnc" else "y1997" if i == "fp" else None),
+                        variant_id=("y1997" if i == "fp" else None),
                     )
                     for i in ids
                 ],

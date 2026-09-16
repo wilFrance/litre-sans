@@ -44,7 +44,7 @@ plafond atteint et `unused_savings_bn > 0`.
 ## Données (`data/measures.yaml`)
 
 8 mesures : `energie` (soutiens aux renouvelables 7,983 Md€ + CEE 0,15 €/L, regroupés), `agences` (ADEME + ARS + HCSP = 1,664),
-`ame` (1,208), `pnc` (9 / 17,5 / 6,1), `apd` (14,827), `av` (4,029), `ville` (7,971),
+`ame` (1,208), `pnc` (9), `apd` (14,827), `av` (4,029), `ville` (7,971),
 `fp` (ratio d'agents publics par habitant, hors santé/police/justice : 1995 → 33 Md€ par défaut,
 1997 → 24 Md€ ; 50 000 €/agent). Les effectifs 1995 sont une estimation à vérifier.
 
