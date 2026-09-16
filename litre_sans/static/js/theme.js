@@ -3,8 +3,7 @@
   var btn = document.getElementById("themeToggle");
   if (!btn) return;
   function current() {
-    if (root.dataset.theme) return root.dataset.theme;
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    return root.dataset.theme || "dark";
   }
   btn.addEventListener("click", function () {
     var next = current() === "dark" ? "light" : "dark";
