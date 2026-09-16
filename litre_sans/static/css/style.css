@@ -98,9 +98,8 @@ button.mini:hover{border-color:var(--petrol)}
 }
 /* Desktop : tout tient dans la fenêtre, les deux panneaux défilent en interne si besoin. */
 @media (min-width:861px){
-  .wrap{display:flex;flex-direction:column;height:100dvh;padding-bottom:10px}
+  body[data-page="index"] .wrap{display:flex;flex-direction:column;height:100dvh;padding-bottom:10px}
   .grid{flex:1;min-height:0;grid-template-rows:minmax(0,1fr);align-items:stretch}
   .grid>.panel{overflow:auto;overscroll-behavior:contain}
   .sticky{position:static}
-  .method{display:none}
 }
