@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import shutil
 from collections.abc import Callable
@@ -90,11 +91,19 @@ def build(out_dir: Path, settings: Settings) -> None:
         autoescape=select_autoescape(["html"]),
         keep_trailing_newline=True,
     )
+    versions = {
+        str(f.relative_to(STATIC_DIR)).replace("\\", "/"): _digest(f)
+        for f in STATIC_DIR.rglob("*")
+        if f.is_file()
+    }
+
     for page, (template_name, published) in PAGES.items():
         prefix = "../" * published.count("/")
 
         def static_url(path: str, prefix: str = prefix) -> str:
-            return f"{prefix}static/{path}"
+            # Empreinte du contenu en query string : un fichier modifié n'est jamais servi
+            # depuis le cache du navigateur avec une page qui ne lui correspond pas.
+            return f"{prefix}static/{path}?v={versions[path]}"
 
         def page_url(name: str, prefix: str = prefix) -> str:
             target = PAGES[name][1]
@@ -110,6 +119,10 @@ def build(out_dir: Path, settings: Settings) -> None:
 
     (out_dir / ".nojekyll").touch()  # GitHub Pages : servir les fichiers tels quels
     print(f"Site généré dans {out_dir} ({len(PAGES)} pages, {len(catalog.measures)} mesures)")
+
+
+def _digest(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()[:10]
 
 
 def main(argv: list[str] | None = None) -> None:

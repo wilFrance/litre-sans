@@ -1,6 +1,7 @@
 """Le générateur produit un site complet avec des chemins relatifs."""
 
 import json
+import re
 from pathlib import Path
 
 from litre_sans.build import STATIC_DIR, build
@@ -14,9 +15,9 @@ def test_build(tmp_path: Path) -> None:
     index = (out / "index.html").read_text(encoding="utf-8")
     methode = (out / "methode" / "index.html").read_text(encoding="utf-8")
     mentions = (out / "mentions-legales" / "index.html").read_text(encoding="utf-8")
-    assert 'src="static/js/engine.js"' in index
-    assert 'href="static/css/style.css"' in index
-    assert 'href="../static/css/style.css"' in methode
+    assert re.search(r'src="static/js/engine\.js\?v=[0-9a-f]{10}"', index)
+    assert re.search(r'href="static/css/style\.css\?v=[0-9a-f]{10}"', index)
+    assert re.search(r'href="\.\./static/css/style\.css\?v=[0-9a-f]{10}"', methode)
     assert 'href="../"' in methode and 'href="../mentions-legales/"' in methode
     assert "GitHub" in mentions
     assert "/static/" not in index  # aucun chemin absolu
