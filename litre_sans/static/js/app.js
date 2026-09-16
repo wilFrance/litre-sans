@@ -148,9 +148,6 @@
       item.classList.toggle("on", on);
       item.querySelector("input[type=checkbox]").checked = on;
       item.querySelector("[data-amount]").textContent = amountLabel(v);
-      const dot = item.querySelector("[data-badge]");
-      dot.className = `dot b-${v.badge.level}`;
-      dot.title = v.badge.label;
       item.querySelector("[data-badge-label]").textContent = v.badge.label;
       const effect = v.unit_effect_per_litre;
       item.querySelector("[data-gain]").innerHTML = `–${money(effect)}<span>/ litre</span>`;

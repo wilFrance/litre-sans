@@ -64,7 +64,6 @@ h2.list{font:700 1.3rem "Barlow Condensed",sans-serif;margin:0;color:var(--petro
 .name{font-weight:600;cursor:pointer;font-size:.92rem;line-height:1.25}
 .by{font-size:.78rem;color:var(--muted);white-space:nowrap;margin-left:8px}
 .item .body{display:flex;flex-wrap:wrap;align-items:center;column-gap:0}
-.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:currentColor;margin-right:6px;vertical-align:0}
 .infowrap{position:relative;display:inline-block;margin-right:4px;vertical-align:1px}
 .info{width:18px;height:18px;padding:0;border-radius:50%;border:1px solid var(--muted);background:transparent;color:var(--muted);font:600 .72rem/1 Georgia,serif;font-style:italic;cursor:help}
 .info:hover,.info[aria-expanded="true"]{border-color:var(--petrol);color:var(--petrol)}
@@ -73,7 +72,6 @@ h2.list{font:700 1.3rem "Barlow Condensed",sans-serif;margin:0;color:var(--petro
 .tip b{color:var(--petrol);font-weight:600}
 .infowrap:hover .tip,.info:focus-visible + .tip,.info[aria-expanded="true"] + .tip{display:block}
 .item .body{min-width:0}
-.b-ok{color:var(--good)} .b-warn{color:var(--warn)}
 .gain{font-variant-numeric:tabular-nums;font-weight:600;color:var(--good);text-align:right;min-width:90px;line-height:1.2;white-space:nowrap;font-size:.95rem}
 .gain span{font-size:.72rem;font-weight:400;color:var(--muted);margin-left:3px}
 .item select{margin:0 0 0 6px;max-width:240px;font-size:.75rem;padding:1px 4px}
