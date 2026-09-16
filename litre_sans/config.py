@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -21,3 +21,8 @@ class Settings(BaseSettings):
     tank_litres: float = Field(default=50.0, gt=0)
     measures_path: Path = PROJECT_ROOT / "data" / "measures.yaml"
     output_dir: Path = PROJECT_ROOT / "site"
+    goatcounter_code: str = Field(
+        default="",
+        validation_alias=AliasChoices("GOATCOUNTER_CODE", "LITRE_SANS_GOATCOUNTER_CODE"),
+        description="Code GoatCounter (<code>.goatcounter.com). Vide : pas de mesure d'audience.",
+    )

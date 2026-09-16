@@ -31,6 +31,9 @@
     <a href="{{ page_url('methode') }}">Méthode</a> · <a href="{{ page_url('mentions') }}">Mentions légales</a>
   </footer>
 </div>
+{% if goatcounter_code %}
+<script data-goatcounter="https://{{ goatcounter_code }}.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+{% endif %}
 <script src="{{ static_url('js/theme.js') }}"></script>
 {% block scripts %}{% endblock %}
 </body>

@@ -48,7 +48,7 @@ label.price input[aria-invalid="true"]{border-color:var(--warn)}
 .legend .v{font-variant-numeric:tabular-nums;text-align:right}
 .total{margin-top:10px;border-top:1px solid var(--line);padding-top:8px;font-size:.85rem;color:var(--muted)}
 .total b{color:var(--ink);font-variant-numeric:tabular-nums}
-.share{margin:6px 0 0;font-size:.82rem;color:var(--muted);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.share{margin:8px 0 0;font-size:.82rem;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 button.link{font:inherit;background:none;border:0;padding:0;color:var(--petrol);text-decoration:underline;cursor:pointer}
 h2.list{font:700 1.3rem "Barlow Condensed",sans-serif;margin:0;color:var(--petrol)}
 .hint{font-size:.88rem;color:var(--muted);margin:0 0 10px}

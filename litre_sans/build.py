@@ -48,6 +48,7 @@ def page_context(
     catalog_out = CatalogOut.from_domain(catalog, simulator)
     return {
         "settings": settings,
+        "goatcounter_code": settings.goatcounter_code.strip(),
         "page": page,
         "static_url": static_url,
         "page_url": page_url,

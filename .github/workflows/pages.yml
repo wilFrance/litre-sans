@@ -35,6 +35,8 @@ jobs:
         run: uv run pytest
 
       - name: Build static site
+        env:
+          GOATCOUNTER_CODE: ${{ vars.GOATCOUNTER_CODE }}
         run: uv run build-site
 
       - name: Set up Node

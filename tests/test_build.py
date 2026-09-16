@@ -4,6 +4,8 @@ import json
 import re
 from pathlib import Path
 
+import pytest
+
 from litre_sans.build import STATIC_DIR, build
 from litre_sans.config import Settings
 
@@ -27,3 +29,27 @@ def test_build(tmp_path: Path) -> None:
     assert (out / "static" / "js" / "engine.js").read_text(encoding="utf-8") == (
         (STATIC_DIR / "js" / "engine.js").read_text(encoding="utf-8")
     )
+
+
+def test_build_without_goatcounter(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("GOATCOUNTER_CODE", raising=False)
+    monkeypatch.delenv("LITRE_SANS_GOATCOUNTER_CODE", raising=False)
+    out = tmp_path / "site"
+    build(out, Settings(goatcounter_code=""))
+    for page in out.rglob("*.html"):
+        assert "goatcounter" not in page.read_text(encoding="utf-8").lower(), page
+
+
+def test_build_with_goatcounter(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("GOATCOUNTER_CODE", "mon-site")
+    settings = Settings()
+    assert settings.goatcounter_code == "mon-site"
+    out = tmp_path / "site"
+    build(out, settings)
+    pages = list(out.rglob("*.html"))
+    assert len(pages) == 3
+    for page in pages:
+        html = page.read_text(encoding="utf-8")
+        assert 'data-goatcounter="https://mon-site.goatcounter.com/count"' in html, page
+        assert 'src="//gc.zgo.at/count.js"' in html, page
+    assert "analytics.js?v=" in (out / "index.html").read_text(encoding="utf-8")

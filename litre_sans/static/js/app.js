@@ -8,6 +8,7 @@
   const BY_ID = Object.fromEntries(MEASURES.map((m) => [m.id, m]));
 
   const $ = (s) => document.querySelector(s);
+  const analytics = new Analytics();
   const fmt = (n, d = 2) =>
     n.toLocaleString("fr-FR", { minimumFractionDigits: d, maximumFractionDigits: d });
   // Montant en euros, deux décimales ; en dessous du centime, on l'indique plutôt que d'afficher 0,00.
@@ -45,6 +46,7 @@
     });
   }
 
+  // L'URL est reconstruite à partir de l'état : les paramètres étrangers (utm_*, etc.) disparaissent.
   function writeUrl() {
     const q = new URLSearchParams();
     q.set("fuel", state.fuel);
@@ -201,9 +203,18 @@
   $("#list").addEventListener("change", (e) => {
     const t = e.target;
     if (t.dataset.id) {
-      if (t.checked) state.on.add(t.dataset.id); else state.on.delete(t.dataset.id);
+      if (t.checked) {
+        state.on.add(t.dataset.id);
+        analytics.track(`mesure-cochee-${t.dataset.id}`);
+      } else {
+        state.on.delete(t.dataset.id);
+      }
     }
-    if (t.dataset.variant) state.variant[t.dataset.variant] = t.value;
+    if (t.dataset.variant) {
+      state.variant[t.dataset.variant] = t.value;
+      const index = BY_ID[t.dataset.variant].variants.findIndex((v) => v.id === t.value);
+      analytics.track(`variante-${t.dataset.variant}-${index}`);
+    }
     update();
   });
 
@@ -249,16 +260,32 @@
   window.addEventListener("resize", reserveSpace);
   reserveSpace();
 
-  $("#shareBtn").addEventListener("click", async () => {
-    const msg = $("#shareMsg");
-    try {
-      await navigator.clipboard.writeText(location.href);
-      msg.textContent = "Lien copié.";
-    } catch (e) {
-      msg.textContent = location.href;
-    }
-    setTimeout(() => { msg.textContent = ""; }, 4000);
-  });
+  const SHARE_TEXT = "Et si les économies allaient à la pompe ? Mon scénario :";
+  const shareTargets = {
+    whatsapp: (url) => `https://wa.me/?text=${encodeURIComponent(`${SHARE_TEXT} ${url}`)}`,
+    x: (url) => `https://twitter.com/intent/tweet?text=${encodeURIComponent(SHARE_TEXT)}&url=${encodeURIComponent(url)}`,
+    facebook: (url) => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+  };
+
+  document.querySelectorAll("[data-share]").forEach((btn) =>
+    btn.addEventListener("click", async () => {
+      const channel = btn.dataset.share;
+      const url = location.href; // sans utm_* : l'URL est réécrite depuis l'état
+      analytics.track(`partage-${channel}`);
+      if (channel === "copie-lien") {
+        const msg = $("#shareMsg");
+        try {
+          await navigator.clipboard.writeText(url);
+          msg.textContent = "Lien copié.";
+        } catch (e) {
+          msg.textContent = url;
+        }
+        setTimeout(() => { msg.textContent = ""; }, 4000);
+        return;
+      }
+      window.open(shareTargets[channel](url), "_blank", "noopener");
+    })
+  );
 
   // ---------- Démarrage ----------
   readUrl();
@@ -266,4 +293,5 @@
   renderList();
   writeUrl();
   simulate();
+  if (state.on.size > 0) analytics.track("scenario-charge");
 })();

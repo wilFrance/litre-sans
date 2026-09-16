@@ -38,7 +38,14 @@
         <span class="sw" style="background:var(--tva)"></span><span>TVA {{ vat_percent }} %</span><span class="v" id="lTVA"></span>
       </div>
       <div class="total" id="total"></div>
-      <p class="share"><button type="button" id="shareBtn" class="link">Copier le lien de ce scénario</button><span id="shareMsg" role="status"></span></p>
+      <div class="share" role="group" aria-label="Partager ce scénario">
+        <span>Partager :</span>
+        <button type="button" class="mini" data-share="whatsapp">WhatsApp</button>
+        <button type="button" class="mini" data-share="x">X</button>
+        <button type="button" class="mini" data-share="facebook">Facebook</button>
+        <button type="button" class="mini" data-share="copie-lien">Copier le lien</button>
+        <span id="shareMsg" role="status"></span>
+      </div>
       </div>
     </section>
 
@@ -89,5 +96,6 @@
 {% block scripts %}
 <script id="catalogData" type="application/json">{{ catalog_json | safe }}</script>
 <script src="{{ static_url('js/engine.js') }}"></script>
+<script src="{{ static_url('js/analytics.js') }}"></script>
 <script src="{{ static_url('js/app.js') }}"></script>
 {% endblock %}

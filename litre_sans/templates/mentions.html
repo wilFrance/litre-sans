@@ -15,12 +15,24 @@
     <a href="https://docs.github.com/fr/pages" rel="noopener" target="_blank">docs.github.com/pages</a>.</p>
 
     <h2>Données personnelles</h2>
-    <p>Le site ne collecte aucune donnée personnelle, n'utilise ni cookie ni traceur, et ne contient aucun formulaire.
+    <p>Le site ne collecte aucune donnée personnelle, n'utilise aucun cookie, et ne contient aucun formulaire.
     Le calcul est effectué entièrement dans votre navigateur ; le scénario choisi n'est encodé que dans l'adresse de la page,
     pour permettre de le partager. Le thème clair ou sombre est mémorisé localement dans votre navigateur uniquement.</p>
     <p>L'hébergeur peut collecter des journaux techniques (adresse IP, pages consultées) selon
     <a href="https://docs.github.com/fr/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener" target="_blank">sa politique de confidentialité</a>.
     Les polices de caractères sont chargées depuis Google Fonts, qui peut également recevoir votre adresse IP.</p>
+
+    <h2>Mesure d'audience</h2>
+    {% if goatcounter_code %}
+    <p>Le site utilise <a href="https://www.goatcounter.com/" rel="noopener" target="_blank">GoatCounter</a>,
+    un outil de statistiques minimaliste et open source, pour compter les pages vues et quelques actions
+    anonymes (mesure cochée, scénario partagé). Il ne dépose <strong>aucun cookie</strong>, ne collecte
+    <strong>aucune donnée personnelle</strong> et ne suit pas les visiteurs d'un site à l'autre ; il est
+    exempté de consentement au sens des recommandations de la CNIL. Voir la
+    <a href="https://www.goatcounter.com/help/privacy" rel="noopener" target="_blank">politique de confidentialité de GoatCounter</a>.</p>
+    {% else %}
+    <p>Aucune mesure d'audience n'est active sur cette version du site.</p>
+    {% endif %}
 
     <h2>Contenu</h2>
     <p>Les montants affichés proviennent de déclarations de candidats ou de documents publics, chacun accompagné d'une source.
