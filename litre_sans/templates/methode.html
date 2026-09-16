@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Méthode — {{ settings.site_title }}{% endblock %}
+{% block content %}
+  <section class="method">
+    <h1>Comment le calcul est fait</h1>
+    <p class="lead">Hypothèse « tout sur le carburant » : chaque euro économisé sert exclusivement à baisser les taxes du litre.</p>
+
+    <h2>L'hypothèse</h2>
+    <p>Chaque milliard d'euros économisé est rendu intégralement aux automobilistes, en baissant l'accise et la TVA sur les {{ litres_billions_fr }} milliards de litres de carburants routiers livrés en France en 2025. Un milliard vaut donc environ {{ per_billion_cents_fr }} centimes par litre. La suppression des CEE agit autrement : c'est un coût imposé aux distributeurs, retiré directement du prix hors taxes.</p>
+
+    <h2>Les étapes</h2>
+    <ol>
+      <li>Le prix de départ est décomposé en hors taxes, accise et TVA ({{ vat_percent }} %).</li>
+      <li>Les mesures « baisse directe » (CEE) réduisent la part hors taxes.</li>
+      <li>Les économies budgétaires cochées sont additionnées, puis divisées par les litres livrés : on obtient une baisse en euros par litre.</li>
+      <li>Cette baisse est retirée des taxes — accise et TVA, au prorata de leur poids — sans pouvoir descendre sous zéro.</li>
+    </ol>
+
+    <h2>Le plafond</h2>
+    <p>On ne peut pas baisser les taxes sous zéro. Au-delà d'environ 1 € par litre d'économies, le surplus n'a plus d'effet sur le prix. Le simulateur affiche alors les milliards « sans effet ».</p>
+
+    <h2>Ce qui n'est pas modélisé</h2>
+    <ul>
+      <li>La hausse de la consommation si le prix baisse.</li>
+      <li>Le calendrier de montée en charge des mesures (par exemple, le non-remplacement des départs dans la fonction publique s'étale sur plusieurs années).</li>
+      <li>Les obstacles juridiques et constitutionnels.</li>
+      <li>Les conséquences des suppressions : services, emplois, aides perdues.</li>
+    </ul>
+
+    <h2>Précautions sur les montants</h2>
+    <p>Les montants sont ceux avancés par les candidats ou tirés des documents budgétaires, selon le badge affiché. Ils ne sont pas additionnables sans précaution : certaines mesures se recoupent partiellement.</p>
+
+    <p><a href="{{ page_url('index') }}">← Retour au simulateur</a></p>
+  </section>
+{% endblock %}

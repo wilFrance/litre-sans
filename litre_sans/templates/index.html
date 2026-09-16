@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Et si les économies allaient à la pompe ?</h1>
+  <p class="lead">Cochez des dépenses publiques à supprimer : leur montant baisse les taxes sur le carburant. <a href="{{ page_url('methode') }}">Comment ça marche</a></p>
+
+  <div class="grid">
+    <section class="panel sticky" id="pumpPanel" aria-label="Prix simulé">
+      <div class="pump" aria-live="polite">
+        <div class="row"><small id="fuelLabel">{{ catalog.fuels[0].label }} — prix simulé</small><small>€ / litre</small></div>
+        <div class="digits" id="newPrice"></div>
+        <div class="row">
+          <div class="was">Aujourd'hui : <span id="oldPrice"></span></div>
+          <div class="delta" id="delta"></div>
+        </div>
+        <div class="tank" id="tank"></div>
+        <div class="capnote" id="cap" hidden></div>
+        <p class="empty" id="empty">Cochez une mesure dans la liste pour voir l'effet sur le prix.</p>
+      </div>
+      <div class="seg" role="group" aria-label="Carburant">
+        {% for fuel in catalog.fuels %}
+        <button type="button" data-fuel="{{ fuel.code }}" aria-pressed="{{ 'true' if loop.first else 'false' }}">{{ fuel.label }}</button>
+        {% endfor %}
+      </div>
+      <button type="button" class="more-toggle" id="pumpMore" aria-expanded="false" aria-controls="pumpExtra">Détails ▾</button>
+      <div class="extra" id="pumpExtra">
+      <label class="price">Prix de départ
+        <input id="priceInput" type="number" step="0.001" min="0.5" max="5" value="{{ catalog.fuels[0].reference_price }}" inputmode="decimal"> €/L
+      </label>
+      <p class="hint" id="priceHint" hidden></p>
+      <div class="bar" aria-hidden="true">
+        <div id="bHT" style="background:var(--ht)"></div>
+        <div id="bAcc" style="background:var(--pump)"></div>
+        <div id="bTVA" style="background:var(--tva)"></div>
+      </div>
+      <div class="legend">
+        <span class="sw" style="background:var(--ht)"></span><span>Produit, raffinage, distribution, CEE</span><span class="v" id="lHT"></span>
+        <span class="sw" style="background:var(--pump)"></span><span>Accise sur les énergies</span><span class="v" id="lAcc"></span>
+        <span class="sw" style="background:var(--tva)"></span><span>TVA {{ vat_percent }} %</span><span class="v" id="lTVA"></span>
+      </div>
+      <div class="total" id="total"></div>
+      <p class="share"><button type="button" id="shareBtn" class="link">Copier le lien de ce scénario</button><span id="shareMsg" role="status"></span></p>
+      </div>
+    </section>
+
+    <section class="panel" aria-label="Mesures">
+      <div class="listhead">
+        <h2 class="list">Les mesures</h2>
+        <div class="actions">
+          <button type="button" id="checkAll" class="mini">Tout cocher</button>
+          <button type="button" id="reset" class="mini">Réinitialiser</button>
+        </div>
+      </div>
+      <div id="list">
+        {% for group in groups %}
+        <div class="group">{{ group }}</div>
+        {% for m in catalog.measures if m.group == group %}
+        {% set v = m.variants[0] %}
+        <div class="item" data-measure="{{ m.id }}">
+          <input type="checkbox" id="c-{{ m.id }}" data-id="{{ m.id }}">
+          <div class="body">
+            <label for="c-{{ m.id }}" class="name">{{ m.name }}</label>
+            <span class="by">
+              <span class="dot b-{{ v.badge.level }}" data-badge title="{{ v.badge.label }}" aria-hidden="true"></span>
+              <span class="infowrap">
+                <button type="button" class="info" aria-label="Qui le propose, fiabilité du chiffre et source" aria-expanded="false" aria-describedby="tip-{{ m.id }}">i</button>
+                <span class="tip" role="tooltip" id="tip-{{ m.id }}">
+                  <b>Proposé par</b> {{ m.sponsors }}.
+                  <br><b>Chiffre</b> <span data-badge-label>{{ v.badge.label }}</span>{% if v.badge.level == 'warn' %} (à prendre avec prudence){% endif %}.
+                  {% if m.note %}<br>{{ m.note }}{% endif %}
+                  <br>{% for src in m.sources %}<a href="{{ src.url }}" target="_blank" rel="noopener">Source{% if src.label %} ({{ src.label }}){% endif %}</a>{% if not loop.last %} · {% endif %}{% endfor %}
+                </span>
+              </span>
+              <span data-amount>{% if v.budget_bn %}{{ v.budget_bn }} Md€ par an{% endif %}{% if v.budget_bn and v.direct_per_litre %} + {% endif %}{% if v.direct_per_litre %}{{ v.direct_per_litre }} €/L{% endif %}</span>
+              {% if m.variants | length > 1 %}
+              <select data-variant="{{ m.id }}" aria-label="Chiffrage retenu pour « {{ m.name }} »">
+                {% for opt in m.variants %}<option value="{{ opt.id }}">{{ opt.label }}</option>{% endfor %}
+              </select>
+              {% endif %}
+            </span>
+          </div>
+          <div class="gain" data-gain></div>
+        </div>
+        {% endfor %}
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+
+{% endblock %}
+{% block scripts %}
+<script id="catalogData" type="application/json">{{ catalog_json | safe }}</script>
+<script src="{{ static_url('js/engine.js') }}"></script>
+<script src="{{ static_url('js/app.js') }}"></script>
+{% endblock %}

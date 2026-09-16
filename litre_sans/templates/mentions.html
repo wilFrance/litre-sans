@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Mentions légales — {{ settings.site_title }}{% endblock %}
+{% block content %}
+  <section class="method">
+    <h1>Mentions légales</h1>
+
+    <h2>Éditeur</h2>
+    <p>Ce site est un projet personnel, indépendant et bénévole, publié sous forme de site statique
+    (site non professionnel au sens de l'article 6-III-2 de la loi pour la confiance dans l'économie numérique :
+    l'éditeur n'est pas nommé ; les coordonnées de l'hébergeur ci-dessous permettent de le joindre).
+    Contact : <a href="mailto:wilrobinet@gmail.com">wilrobinet@gmail.com</a>.</p>
+
+    <h2>Hébergement</h2>
+    <p>Le site est hébergé par GitHub, Inc. (GitHub Pages), 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, États-Unis —
+    <a href="https://docs.github.com/fr/pages" rel="noopener" target="_blank">docs.github.com/pages</a>.</p>
+
+    <h2>Données personnelles</h2>
+    <p>Le site ne collecte aucune donnée personnelle, n'utilise ni cookie ni traceur, et ne contient aucun formulaire.
+    Le calcul est effectué entièrement dans votre navigateur ; le scénario choisi n'est encodé que dans l'adresse de la page,
+    pour permettre de le partager. Le thème clair ou sombre est mémorisé localement dans votre navigateur uniquement.</p>
+    <p>L'hébergeur peut collecter des journaux techniques (adresse IP, pages consultées) selon
+    <a href="https://docs.github.com/fr/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener" target="_blank">sa politique de confidentialité</a>.
+    Les polices de caractères sont chargées depuis Google Fonts, qui peut également recevoir votre adresse IP.</p>
+
+    <h2>Contenu</h2>
+    <p>Les montants affichés proviennent de déclarations de candidats ou de documents publics, chacun accompagné d'une source.
+    Ce simulateur est un outil pédagogique : il ne constitue ni une prévision, ni une position partisane.
+    Toute erreur peut être signalée via le dépôt du projet.</p>
+
+    <h2>Licence</h2>
+    <p>Code source publié sous licence MIT, données et textes sous licence
+    <a href="https://creativecommons.org/licenses/by/4.0/deed.fr" rel="noopener" target="_blank">CC BY 4.0</a>,
+    sur le dépôt GitHub du projet.</p>
+
+    <p><a href="{{ page_url('index') }}">← Retour au simulateur</a></p>
+  </section>
+{% endblock %}

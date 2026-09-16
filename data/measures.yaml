@@ -1,0 +1,161 @@
+# Catalogue des carburants et des mesures. Validé au démarrage de l'application et au build.
+# Chaque variante porte une économie budgétaire (budget_bn, Md€ par an) et/ou une baisse
+# directe du prix TTC (direct_per_litre, €/L). La première variante est celle par défaut.
+
+fuels:
+  - code: gazole
+    label: Gazole
+    reference_price: 2.364   # moyenne nationale au 16/09/2026
+    excise: 0.6075
+  - code: e10
+    label: SP95-E10
+    reference_price: 2.150
+    excise: 0.6702
+
+measures:
+  - id: energie
+    group: Énergie
+    name: Supprimer les CEE et les soutiens aux énergies renouvelables
+    sponsors: Bruno Retailleau (CEE, renouvelables « matures »), Sarah Knafo (renouvelables)
+    note: >-
+      Les certificats d'économies d'énergie (CEE) sont un coût imposé aux distributeurs, retiré
+      directement du prix : l'Ufip l'estime à 15-17 c/L en 2026. Les soutiens aux renouvelables
+      (7,983 Md€) sont une dépense budgétaire, variable selon les prix de l'électricité.
+    sources:
+      - label: Public Sénat
+        url: https://www.publicsenat.fr/actualites/politique/logement-bruno-retailleau-propose-de-deduire-de-l-imot-les-interets-d-emprunt-pour-un-pret-immobilier-en-fonction-du-nombre-d-enfants
+      - label: Boulevard Voltaire
+        url: https://www.bvoltaire.fr/budget-2026-sarah-knafo-detaille-63-milliards-deuros-deconomies/
+    variants:
+      - id: default
+        label: 7,983 Md€ par an + 0,15 €/L
+        budget_bn: 7.983
+        direct_per_litre: 0.15
+        badge: { level: warn, label: Chiffrage des candidats }
+
+  - id: agences
+    group: Agences et organismes
+    name: Supprimer des agences et organismes de l'État
+    sponsors: Sarah Knafo (ADEME, ARS), David Lisnard (ARS), groupe Droite républicaine (Haut-commissariat au plan)
+    note: >-
+      Somme de trois suppressions : ADEME (1,06 Md€, subvention de l'État 2026), fonctionnement
+      des agences régionales de santé (0,594 Md€, dernier chiffre publié 2021 ; les crédits qui
+      financent les soins ne sont pas comptés) et Haut-commissariat à la stratégie et au plan
+      (0,010 Md€, amendement PLF 2026).
+    sources:
+      - label: Sénat, ADEME
+        url: https://www.senat.fr/rap/l25-139-310-1/l25-139-310-111.html
+      - label: budget.gouv.fr, ARS
+        url: https://www.budget.gouv.fr/files/uploads/extract/2021/PLF/BG/PGM/124/FR_2021_PLF_BG_PGM_124_OPE.html
+      - label: Assemblée nationale, HCSP
+        url: https://www.assemblee-nationale.fr/dyn/17/amendements/2247/AN/3381.pdf
+    variants:
+      - id: default
+        label: 1,664 Md€ par an
+        budget_bn: 1.664
+        badge: { level: warn, label: "Documents budgétaires, ARS : chiffre 2021" }
+
+  - id: ame
+    group: Immigration
+    name: Supprimer l'aide médicale d'État (AME)
+    sponsors: Sarah Knafo
+    note: Obstacle constitutionnel possible.
+    sources:
+      - label: Assemblée nationale
+        url: https://www.assemblee-nationale.fr/dyn/17/amendements/1906C/CION_FIN/CF1164.pdf
+    variants:
+      - id: default
+        label: 1,208 Md€ par an
+        budget_bn: 1.208
+        badge: { level: ok, label: Budget 2026 }
+
+  - id: pnc
+    group: Immigration
+    name: Supprimer les aides non contributives aux étrangers
+    sponsors: Sarah Knafo ; version restreinte au RN
+    note: Réserver des prestations aux Français est jugé contraire à la Constitution en l'état.
+    sources:
+      - label: Les Surligneurs
+        url: https://lessurligneurs.eu/prestations-sociales-ame-energies-renouvelables-pourquoi-les-mesures-deconomies-de-sarah-knafo-sont-juridiquement-incertaines/
+    variants:
+      - id: cnaf
+        label: ≈ 9 Md€ — estimation fondée sur les données Cnaf
+        budget_bn: 9
+        badge: { level: ok, label: Estimation indépendante }
+      - id: knafo
+        label: 15 à 20 Md€ — chiffrage Knafo (contesté)
+        budget_bn: 17.5
+        badge: { level: warn, label: "Chiffrage du candidat (15 à 20 Md€, contesté)" }
+      - id: rn
+        label: 6,1 Md€ — version RN (moins de 5 ans de travail)
+        budget_bn: 6.1
+        badge: { level: warn, label: Chiffrage du parti }
+
+  - id: apd
+    group: Autres dépenses
+    name: Supprimer l'aide publique au développement
+    sponsors: Sarah Knafo
+    note: L'APD au sens statistique inclut des dépenses hors budget du ministère.
+    sources:
+      - label: Boulevard Voltaire
+        url: https://www.bvoltaire.fr/budget-2026-sarah-knafo-detaille-63-milliards-deuros-deconomies/
+    variants:
+      - id: default
+        label: 14,827 Md€ par an
+        budget_bn: 14.827
+        badge: { level: warn, label: Périmètre à vérifier }
+
+  - id: av
+    group: Autres dépenses
+    name: Privatiser l'audiovisuel public
+    sponsors: Sarah Knafo
+    note: ""
+    sources:
+      - label: Boulevard Voltaire
+        url: https://www.bvoltaire.fr/budget-2026-sarah-knafo-detaille-63-milliards-deuros-deconomies/
+    variants:
+      - id: default
+        label: 4,029 Md€ par an
+        budget_bn: 4.029
+        badge: { level: warn, label: Chiffrage du candidat }
+
+  - id: ville
+    group: Autres dépenses
+    name: Supprimer le soutien à la politique de la ville
+    sponsors: Sarah Knafo
+    note: Le programme budgétaire dédié est bien plus petit ; le montant agrège des crédits de plusieurs ministères.
+    sources:
+      - label: Boulevard Voltaire
+        url: https://www.bvoltaire.fr/budget-2026-sarah-knafo-detaille-63-milliards-deuros-deconomies/
+    variants:
+      - id: default
+        label: 7,971 Md€ par an
+        budget_bn: 7.971
+        badge: { level: warn, label: Périmètre à vérifier }
+
+  - id: fp
+    group: Fonction publique
+    name: Ramener le nombre d'agents publics par habitant à son niveau de 1995 (hors santé, police, justice)
+    sponsors: Objectif inspiré des 800 000 postes de Sarah Knafo, rapporté à la population
+    note: >-
+      85,5 agents pour 1 000 habitants fin 2024 (5,85 M d'agents, 68,4 M d'habitants), contre
+      environ 76 à la fin du second septennat de François Mitterrand (≈ 4,5 M d'agents pour
+      59,4 M d'habitants en 1995) et 78,5 en 1997 (Fipeco). Revenir à ce ratio avec la population
+      actuelle demande de l'ordre de –660 000 agents. Les effectifs de la santé, de la police et
+      de la justice sont maintenus : la réduction porte sur les autres services. Coût retenu :
+      50 000 € par agent, ratio implicite du chiffrage Knafo (40 Md€ pour 800 000). Par
+      non-remplacement des départs, l'effet s'étale sur plusieurs années.
+    sources:
+      - label: Fipeco, effectifs
+        url: https://www.fipeco.fr/commentaire/Les%20effectifs%20de%20la%20fonction%20publique%20de%201997%20%C3%A0%202024
+      - label: Insee, population
+        url: https://www.insee.fr/fr/statistiques/2381474
+    variants:
+      - id: y1995
+        label: "Ratio de 1995, fin Mitterrand (≈ 76 ‰) : –660 000 agents ≈ 33 Md€"
+        budget_bn: 33.0
+        badge: { level: warn, label: "Effectifs 1995 estimés, à vérifier ; coût par agent du candidat" }
+      - id: y1997
+        label: "Ratio de 1997, début Jospin (78,5 ‰) : –480 000 agents ≈ 24 Md€"
+        budget_bn: 24.0
+        badge: { level: warn, label: "Effectifs et population sourcés, coût par agent du candidat" }

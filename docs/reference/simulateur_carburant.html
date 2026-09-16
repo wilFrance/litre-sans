@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Le litre sans… — simulateur taxes carburant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F5F4; --surface:#FFFFFF; --ink:#16282B; --muted:#5E6F72; --line:#D5DDDC;
+  --petrol:#0E4A52; --pump:#F2B705; --tva:#E07A1F; --ht:#7FA7AB; --good:#1F7A4D; --warn:#A5541A;
+  --display:#0A1F22; --digits:#FFD34D;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1A1C; --surface:#172527; --ink:#E6EEEE; --muted:#93A6A8; --line:#2A3B3E;
+    --petrol:#5FB3BC; --ht:#4E7F84; --good:#4CC38A; --warn:#E8A06A; --display:#050D0E;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1A1C; --surface:#172527; --ink:#E6EEEE; --muted:#93A6A8; --line:#2A3B3E;
+  --petrol:#5FB3BC; --ht:#4E7F84; --good:#4CC38A; --warn:#E8A06A; --display:#050D0E;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Barlow,system-ui,sans-serif}
+.wrap{max-width:1120px;margin:0 auto;padding:28px 20px 60px}
+h1{font:700 clamp(2.2rem,5vw,3.4rem)/1 "Barlow Condensed",Impact,sans-serif;margin:0 0 8px;color:var(--petrol)}
+.lead{max-width:64ch;color:var(--muted);margin:0 0 28px}
+.grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:24px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+.sticky{position:sticky;top:16px}
+@media (max-width:860px){.sticky{position:static}}
+.pump{background:var(--display);border-radius:10px;padding:18px 20px;color:#CFE3E5;border:3px solid var(--pump)}
+.pump .row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.pump small{font-size:.85rem;opacity:.75}
+.digits{font:700 clamp(3.4rem,9vw,5rem)/1 "Barlow Condensed",sans-serif;color:var(--digits);font-variant-numeric:tabular-nums;text-shadow:0 0 18px rgba(255,211,77,.35)}
+.digits sup{font-size:.4em;vertical-align:.9em;margin-left:2px}
+.was{font:500 1.4rem "Barlow Condensed",sans-serif;font-variant-numeric:tabular-nums}
+.delta{font-weight:600;color:#7EE0AA}
+.capnote{margin-top:10px;font-size:.85rem;color:var(--digits)}
+.seg{display:flex;gap:6px;margin:16px 0 4px}
+.seg button{flex:1;font:600 .95rem Barlow,sans-serif;padding:8px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--petrol);border-color:var(--petrol);color:#fff}
+label.price{display:flex;align-items:center;gap:8px;font-size:.9rem;color:var(--muted);margin-top:10px}
+label.price input,select{font:inherit;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+label.price input{width:90px}
+.bar{display:flex;height:34px;border-radius:6px;overflow:hidden;margin:18px 0 8px}
+.bar div{transition:flex-basis .35s ease;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:600;color:#10292C;white-space:nowrap;overflow:hidden}
+.legend{display:grid;grid-template-columns:auto 1fr auto;gap:4px 10px;font-size:.9rem}
+.sw{width:12px;height:12px;border-radius:3px;margin-top:5px}
+.legend .v{font-variant-numeric:tabular-nums;text-align:right}
+.total{margin-top:16px;border-top:1px solid var(--line);padding-top:12px;font-size:.92rem;color:var(--muted)}
+.total b{color:var(--ink);font-variant-numeric:tabular-nums}
+h2.list{font:700 1.5rem "Barlow Condensed",sans-serif;margin:0 0 4px;color:var(--petrol)}
+.hint{font-size:.88rem;color:var(--muted);margin:0 0 10px}
+.group{font:600 .95rem Barlow,sans-serif;margin:16px 0 2px;color:var(--muted)}
+.item{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;padding:12px 4px;border-bottom:1px solid var(--line)}
+.item input[type=checkbox]{width:18px;height:18px;margin-top:3px;accent-color:var(--petrol);cursor:pointer}
+.item.on{background:color-mix(in srgb,var(--pump) 12%,transparent)}
+.name{font-weight:600}
+.by{font-size:.82rem;color:var(--muted)}
+.note{font-size:.82rem;margin-top:3px}
+.note a{color:inherit}
+.badge{display:inline-block;font-size:.72rem;font-weight:600;padding:1px 7px;border-radius:10px;margin-right:6px;border:1px solid currentColor}
+.b-ok{color:var(--good)} .b-warn{color:var(--warn)}
+.gain{font-variant-numeric:tabular-nums;font-weight:600;color:var(--good);text-align:right;min-width:80px}
+.gain span{display:block;font-size:.75rem;font-weight:400;color:var(--muted)}
+.item select{margin-top:6px;max-width:100%;font-size:.85rem}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--pump);outline-offset:2px}
+.method{margin-top:28px}
+.method h2{font:700 1.7rem "Barlow Condensed",sans-serif;margin:0 0 8px;color:var(--petrol)}
+.method p,.method ul{max-width:75ch;margin:0 0 10px}
+.method ul{padding-left:1.2em}
+@media (prefers-reduced-motion:reduce){.bar div{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Et si chaque euro économisé allait à la pompe ?</h1>
+  <p class="lead">Des candidats proposent de supprimer certaines dépenses. Cochez-les : le simulateur consacre toute l'économie à baisser les taxes sur le carburant, répartie sur les litres vendus en France, et affiche le nouveau prix.</p>
+
+  <div class="grid">
+    <section class="panel sticky" aria-label="Prix simulé">
+      <div class="pump" aria-live="polite">
+        <div class="row"><small id="fuelLabel">Gazole — prix simulé</small><small>€ / litre</small></div>
+        <div class="digits" id="newPrice"></div>
+        <div class="row">
+          <div class="was">Aujourd'hui : <span id="oldPrice"></span></div>
+          <div class="delta" id="delta"></div>
+        </div>
+        <div class="capnote" id="cap" hidden></div>
+      </div>
+      <div class="seg" role="group" aria-label="Carburant">
+        <button type="button" data-fuel="gazole" aria-pressed="true">Gazole</button>
+        <button type="button" data-fuel="e10" aria-pressed="false">SP95-E10</button>
+      </div>
+      <label class="price">Prix de départ
+        <input id="priceInput" type="number" step="0.001" min="0.5" max="5" value="2.364"> €/L
+      </label>
+      <div class="bar" aria-hidden="true">
+        <div id="bHT" style="background:var(--ht)"></div>
+        <div id="bAcc" style="background:var(--pump)"></div>
+        <div id="bTVA" style="background:var(--tva)"></div>
+      </div>
+      <div class="legend">
+        <span class="sw" style="background:var(--ht)"></span><span>Produit, raffinage, distribution, CEE</span><span class="v" id="lHT"></span>
+        <span class="sw" style="background:var(--pump)"></span><span>Accise sur les énergies</span><span class="v" id="lAcc"></span>
+        <span class="sw" style="background:var(--tva)"></span><span>TVA 20 %</span><span class="v" id="lTVA"></span>
+      </div>
+      <div class="total" id="total"></div>
+    </section>
+
+    <section class="panel" aria-label="Mesures">
+      <h2 class="list">Les mesures</h2>
+      <p class="hint">Seules les pistes chiffrées avec une mesure précise sont retenues. Le badge indique la solidité du montant.</p>
+      <div id="list"></div>
+    </section>
+  </div>
+
+  <section class="method">
+    <h2>Comment le calcul est fait</h2>
+    <p>Chaque milliard d'euros économisé est rendu intégralement aux automobilistes, en baissant l'accise et la TVA sur les 47,5 milliards de litres de carburants routiers livrés en France en 2025. Un milliard vaut donc environ 2,1 centimes par litre. La suppression des CEE agit autrement : c'est un coût imposé aux distributeurs, retiré directement du prix.</p>
+    <ul>
+      <li>Plafond : on ne peut pas baisser les taxes sous zéro. Au-delà d'environ 1 € par litre, le surplus d'économie n'a plus d'effet sur le prix.</li>
+      <li>Non modélisé : hausse de la consommation si le prix baisse, calendrier de montée en charge des mesures, obstacles juridiques, conséquences des suppressions (services, emplois, aides perdues).</li>
+      <li>Les montants sont ceux avancés par les candidats ou tirés des documents budgétaires, selon le badge. Ils ne sont pas additionnables sans précaution : certaines mesures se recoupent partiellement.</li>
+    </ul>
+  </section>
+</div>
+
+<script>
+const LITRES_MD = 47.5; // milliards de litres livrés en 2025 (CPDP / Ufip)
+const FUELS = {
+  gazole: { label:"Gazole", price:2.364, excise:0.6075 },
+  e10:    { label:"SP95-E10", price:2.150, excise:0.6702 }
+};
+// kind "budget" : économie en Md€ ; kind "direct" : baisse du prix TTC en €/L
+const MEASURES = [
+  { group:"Énergie", id:"cee", kind:"direct", name:"Supprimer les certificats d'économies d'énergie (CEE)", by:"Bruno Retailleau",
+    value:0.15, badge:["warn","Estimation du candidat"], note:"L'Ufip estime leur poids à 15-17 c/L en 2026. Supprime aussi les primes financées par les CEE.",
+    src:"https://www.publicsenat.fr/actualites/politique/logement-bruno-retailleau-propose-de-deduire-de-l-imot-les-interets-d-emprunt-pour-un-pret-immobilier-en-fonction-du-nombre-d-enfants" },
+  { group:"Énergie", id:"enr", kind:"budget", name:"Supprimer les soutiens publics aux énergies renouvelables", by:"Sarah Knafo, Bruno Retailleau (renouvelables « matures »)",
+    value:7.983, badge:["warn","Chiffrage du candidat"], note:"Montant variable selon les prix de l'électricité.",
+    src:"https://www.bvoltaire.fr/budget-2026-sarah-knafo-detaille-63-milliards-deuros-deconomies/" },
+  { group:"Agences et organismes", id:"ademe", kind:"budget", name:"Supprimer l'ADEME", by:"Sarah Knafo",
+    value:1.06, badge:["ok","Budget 2026"], note:"Subvention de l'État en crédits de paiement 2026 (rapport du Sénat).",
+    src:"https://www.senat.fr/rap/l25-139-310-1/l25-139-310-111.html" },
+  { group:"Agences et organismes", id:"ars", kind:"budget", name:"Supprimer les agences régionales de santé (fonctionnement)", by:"Sarah Knafo, David Lisnard",
+    value:0.594, badge:["warn","Dernier chiffre publié : 2021"], note:"Subvention de fonctionnement de l'État. Les crédits qui financent les soins (FIR) ne sont pas comptés.",
+    src:"https://www.budget.gouv.fr/files/uploads/extract/2021/PLF/BG/PGM/124/FR_2021_PLF_BG_PGM_124_OPE.html" },
+  { group:"Agences et organismes", id:"hcsp", kind:"budget", name:"Supprimer le Haut-commissariat à la stratégie et au plan", by:"Amendement du groupe Droite républicaine",
+    value:0.010, badge:["ok","Amendement PLF 2026"], note:"Crédits visés : 7,2 à 10 M€.",
+    src:"https://www.assemblee-nationale.fr/dyn/17/amendements/2247/AN/3381.pdf" },
+  { group:"Immigration", id:"ame", kind:"budget", name:"Supprimer l'aide médicale d'État (AME)", by:"Sarah Knafo",
+    value:1.208, badge:["ok","Budget 2026"], note:"Obstacle constitutionnel possible.",
+    src:"https://www.assemblee-nationale.fr/dyn/17/amendements/1906C/CION_FIN/CF1164.pdf" },
+  { group:"Immigration", id:"pnc", kind:"budget", name:"Supprimer les aides non contributives aux étrangers", by:"Sarah Knafo ; version restreinte au RN",
+    variants:[
+      { value:9, label:"≈ 9 Md€ — estimation fondée sur les données Cnaf", badge:["ok","Estimation indépendante"] },
+      { value:17.5, label:"15 à 20 Md€ — chiffrage Knafo (contesté)", badge:["warn","Chiffrage du candidat"] },
+      { value:6.1, label:"6,1 Md€ — version RN (moins de 5 ans de travail)", badge:["warn","Chiffrage du parti"] }
+    ], note:"Réserver des prestations aux Français est jugé contraire à la Constitution en l'état.",
+    src:"https://lessurligneurs.eu/prestations-sociales-ame-energies-renouvelables-pourquoi-les-mesures-deconomies-de-sarah-knafo-sont-juridiquement-incertaines/" },
+  { group:"Autres dépenses", id:"apd", kind:"budget", name:"Supprimer l'aide publique au développement", by:"Sarah Knafo",
+    value:14.827, badge:["warn","Périmètre à vérifier"], note:"L'APD au sens statistique inclut des dépenses hors budget du ministère.",
+    src:"https://www.bvoltaire.fr/budget-2026-sarah-knafo-detaille-63-milliards-deuros-deconomies/" },
+  { group:"Autres dépenses", id:"av", kind:"budget", name:"Privatiser l'audiovisuel public", by:"Sarah Knafo",
+    value:4.029, badge:["warn","Chiffrage du candidat"], note:"",
+    src:"https://www.bvoltaire.fr/budget-2026-sarah-knafo-detaille-63-milliards-deuros-deconomies/" },
+  { group:"Autres dépenses", id:"ville", kind:"budget", name:"Supprimer le soutien à la politique de la ville", by:"Sarah Knafo",
+    value:7.971, badge:["warn","Périmètre à vérifier"], note:"Le programme budgétaire dédié est bien plus petit ; le montant agrège des crédits de plusieurs ministères.",
+    src:"https://www.bvoltaire.fr/budget-2026-sarah-knafo-detaille-63-milliards-deuros-deconomies/" },
+  { group:"Fonction publique", id:"fp", kind:"budget", name:"Revenir au nombre d'agents publics de l'ère Jospin", by:"Objectif proche des 800 000 postes de Sarah Knafo",
+    variants:[
+      { value:38.4, label:"Niveau de 2002, fin de l'ère Jospin : –770 000 agents ≈ 38 Md€", badge:["warn","Effectifs sourcés, coût par agent du candidat"] },
+      { value:57.7, label:"Niveau de 1997, début de l'ère Jospin : –1 150 000 agents ≈ 58 Md€", badge:["warn","Effectifs sourcés, coût par agent du candidat"] }
+    ], note:"5,85 millions d'agents fin 2024, dont +386 000 entre 1997 et 2002 (Fipeco). Coût retenu : 50 000 € par agent, ratio implicite du chiffrage Knafo (40 Md€ pour 800 000). Par non-remplacement des départs, l'effet s'étale sur plusieurs années.",
+    src:"https://www.fipeco.fr/commentaire/Les%20effectifs%20de%20la%20fonction%20publique%20de%201997%20%C3%A0%202024" }
+];
+
+const state = { fuel:"gazole", price:FUELS.gazole.price, on:new Set(), variant:{ pnc:0, fp:0 } };
+const $ = s => document.querySelector(s);
+const fmt = (n,d=3) => n.toLocaleString("fr-FR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const cents = v => { const c = v*100; return fmt(c, c < 1 ? 2 : 1); };
+const measureValue = m => m.variants ? m.variants[state.variant[m.id]].value : m.value;
+const measureBadge = m => m.variants ? m.variants[state.variant[m.id]].badge : m.badge;
+const perLitre = m => m.kind === "direct" ? measureValue(m) : measureValue(m) / LITRES_MD;
+
+function compute(){
+  const f = FUELS[state.fuel];
+  const htBase = Math.max(0, state.price/1.2 - f.excise);
+  let direct = 0, budgetMd = 0;
+  MEASURES.filter(m => state.on.has(m.id)).forEach(m => m.kind === "direct" ? direct += m.value : budgetMd += measureValue(m));
+  const ht = Math.max(0, htBase - direct/1.2);
+  const excise = f.excise, tva = 0.2*(ht + excise), tax = excise + tva;
+  const budgetCut = budgetMd / LITRES_MD;
+  const cut = Math.min(tax, budgetCut);
+  const k = tax > 0 ? (tax - cut)/tax : 0;
+  const unused = Math.max(0, budgetCut - tax) * LITRES_MD;
+  return { ht, acc:excise*k, tva:tva*k, price: ht + (tax-cut), budgetMd, unused };
+}
+
+function renderList(){
+  let html = "", g = "";
+  MEASURES.forEach(m => {
+    if (m.group !== g){ g = m.group; html += `<div class="group">${g}</div>`; }
+    const b = measureBadge(m), v = perLitre(m), on = state.on.has(m.id);
+    const amount = m.kind === "direct" ? "Baisse directe du prix" : `${fmt(measureValue(m), measureValue(m) < 1 ? 3 : 1)} Md€ par an`;
+    const sel = m.variants ? `<select data-variant="${m.id}" aria-label="Chiffrage retenu">${m.variants.map((x,i)=>`<option value="${i}" ${i===state.variant[m.id]?"selected":""}>${x.label}</option>`).join("")}</select>` : "";
+    html += `<div class="item ${on?"on":""}">
+      <input type="checkbox" id="c-${m.id}" data-id="${m.id}" ${on?"checked":""}>
+      <div><label for="c-${m.id}" class="name">${m.name}</label>
+        <div class="by">${m.by} — ${amount}</div>
+        <div class="note"><span class="badge b-${b[0]}">${b[1]}</span>${m.note} <a href="${m.src}" target="_blank" rel="noopener">Source</a></div>
+        ${sel}</div>
+      <div class="gain">–${cents(v)} c<span>par litre</span></div>
+    </div>`;
+  });
+  $("#list").innerHTML = html;
+}
+
+function render(){
+  const f = FUELS[state.fuel], r = compute();
+  const s = fmt(r.price);
+  $("#newPrice").innerHTML = `${s.slice(0,-1)}<sup>${s.slice(-1)}</sup>`;
+  $("#oldPrice").textContent = `${fmt(state.price)} €`;
+  $("#fuelLabel").textContent = `${f.label} — prix simulé`;
+  const d = state.price - r.price;
+  $("#delta").textContent = d > 0.00005 ? `–${cents(d)} c / litre` : "aucune baisse";
+  $("#cap").hidden = r.unused <= 0.01;
+  $("#cap").textContent = `Taxes à zéro : ${fmt(r.unused,1)} Md€ d'économies n'ont plus d'effet sur le litre.`;
+  [["#bHT",r.ht,"#lHT"],["#bAcc",r.acc,"#lAcc"],["#bTVA",r.tva,"#lTVA"]].forEach(([b,v,l]) => {
+    $(b).style.flexBasis = (r.price ? v/r.price*100 : 0) + "%";
+    $(b).textContent = r.price && v/r.price > .12 ? fmt(v,2) + " €" : "";
+    $(l).textContent = fmt(v) + " €";
+  });
+  $("#total").innerHTML = `Économies budgétaires cochées : <b>${fmt(r.budgetMd,1)} Md€</b> par an. Plein de 50 L : <b>${fmt(d*50,2)} €</b> de moins.`;
+  renderList();
+}
+
+document.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => {
+  state.fuel = b.dataset.fuel; state.price = FUELS[state.fuel].price;
+  $("#priceInput").value = state.price;
+  document.querySelectorAll(".seg button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  render();
+}));
+$("#priceInput").addEventListener("input", e => {
+  const v = parseFloat(e.target.value);
+  if (v > FUELS[state.fuel].excise * 1.2) { state.price = v; render(); }
+});
+$("#list").addEventListener("change", e => {
+  if (e.target.dataset.id){ e.target.checked ? state.on.add(e.target.dataset.id) : state.on.delete(e.target.dataset.id); }
+  if (e.target.dataset.variant){ state.variant[e.target.dataset.variant] = +e.target.value; }
+  render();
+});
+render();
+</script>
+</body>
+</html>

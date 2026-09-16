@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{{ settings.site_title }}{% endblock %}</title>
+<meta name="description" content="{% block description %}Combien coûterait le litre de carburant si les économies proposées par les candidats allaient aux taxes sur le carburant ?{% endblock %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ static_url('css/style.css') }}">
+<script>
+  // Applique le thème mémorisé avant le premier rendu pour éviter un flash.
+  try { var t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <nav aria-label="Navigation principale">
+      <a href="{{ page_url('index') }}" {% if page == 'index' %}aria-current="page"{% endif %}>Simulateur</a>
+      <a href="{{ page_url('methode') }}" {% if page == 'methode' %}aria-current="page"{% endif %}>Méthode</a>
+    </nav>
+    <button type="button" class="theme" id="themeToggle" aria-label="Basculer le thème clair ou sombre" title="Thème clair / sombre">
+      <span aria-hidden="true">◐</span>
+    </button>
+  </header>
+  {% block content %}{% endblock %}
+  <footer class="foot">
+    <a href="{{ page_url('methode') }}">Méthode</a> · <a href="{{ page_url('mentions') }}">Mentions légales</a>
+  </footer>
+</div>
+<script src="{{ static_url('js/theme.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>
