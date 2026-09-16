@@ -16,6 +16,7 @@ from litre_sans.catalog import load_catalog
 from litre_sans.config import Settings
 from litre_sans.export import CatalogOut
 from litre_sans.models import Catalog
+from litre_sans.og_image import render_default, render_scenario
 from litre_sans.simulator import Simulator
 
 PACKAGE_DIR = Path(__file__).resolve().parent
@@ -28,6 +29,9 @@ PAGES: dict[str, tuple[str, str]] = {
     "methode": ("methode.html", "methode/"),
     "mentions": ("mentions.html", "mentions-legales/"),
 }
+TAGLINE = (
+    "Cochez des dépenses publiques à supprimer : leur montant baisse les taxes sur le carburant."
+)
 
 
 def fr_number(value: float, decimals: int = 1) -> str:
@@ -44,14 +48,32 @@ def page_context(
     page: str,
     static_url: Callable[[str], str],
     page_url: Callable[[str], str],
+    published: str = "",
+    og: dict[str, str] | None = None,
+    preset: str = "",
 ) -> dict[str, Any]:
     catalog_out = CatalogOut.from_domain(catalog, simulator)
+    site_url = settings.site_url.strip()
+    if site_url and not site_url.endswith("/"):
+        site_url += "/"
+    og = {
+        "title": settings.site_title,
+        "description": TAGLINE,
+        "image": "static/og/default.png",
+        **(og or {}),
+    }
     return {
         "settings": settings,
         "goatcounter_code": settings.goatcounter_code.strip(),
         "page": page,
+        "preset": preset,
         "static_url": static_url,
         "page_url": page_url,
+        "site_url": site_url,
+        "og_url": f"{site_url}{published}" if site_url else "",
+        "og_image": f"{site_url}{og['image']}" if site_url else "",
+        "og_title": og["title"],
+        "og_description": og["description"],
         "catalog": catalog_out,
         "catalog_json": catalog_out.model_dump_json(),
         "groups": catalog.groups,
@@ -59,6 +81,10 @@ def page_context(
         "vat_percent": round(simulator.vat_rate * 100),
         "per_billion_cents_fr": fr_number(100 / simulator.litres_billions, 1),
     }
+
+
+def _fr_money(value: float) -> str:
+    return f"{value:.2f}".replace(".", ",")
 
 
 def build(out_dir: Path, settings: Settings) -> None:
@@ -86,6 +112,22 @@ def build(out_dir: Path, settings: Settings) -> None:
     # Fichiers statiques : site/static/
     shutil.copytree(STATIC_DIR, out_dir / "static")
 
+    # Images d'aperçu Open Graph : une par scénario phare + une générique
+    og_dir = out_dir / "static" / "og"
+    og_dir.mkdir()
+    render_default(site_title=settings.site_title, tagline=TAGLINE).save(og_dir / "default.png")
+    fuel_label = catalog.fuels[0].label
+    for sc in catalog_out.scenarios:
+        render_scenario(
+            title=f"{sc.title} : {_fr_money(sc.tank_saving)} € de moins sur le plein",
+            price_before=sc.price_before,
+            price_after=sc.price_after,
+            tank_saving=sc.tank_saving,
+            tank_litres=sc.tank_litres,
+            fuel_label=fuel_label,
+            site_title=settings.site_title,
+        ).save(og_dir / f"{sc.id}.png")
+
     # Pages HTML
     env = Environment(
         loader=FileSystemLoader(TEMPLATES_DIR),
@@ -98,7 +140,22 @@ def build(out_dir: Path, settings: Settings) -> None:
         if f.is_file()
     }
 
-    for page, (template_name, published) in PAGES.items():
+    # Pages fixes + une page par scénario phare (même simulateur, mesure pré-cochée)
+    jobs: list[tuple[str, str, str, dict[str, str], str]] = [
+        (page, template, published, {}, "") for page, (template, published) in PAGES.items()
+    ]
+    for sc in catalog_out.scenarios:
+        og = {
+            "title": f"{sc.title} : {_fr_money(sc.tank_saving)} € de moins sur le plein",
+            "description": (
+                f"Le litre de {fuel_label.lower()} passerait de {_fr_money(sc.price_before)} € à "
+                f"{_fr_money(sc.price_after)} €. Et vous, que supprimeriez-vous ?"
+            ),
+            "image": f"static/og/{sc.id}.png",
+        }
+        jobs.append(("index", "index.html", sc.path, og, sc.measure_id))
+
+    for page, template_name, published, og, preset in jobs:
         prefix = "../" * published.count("/")
 
         def static_url(path: str, prefix: str = prefix) -> str:
@@ -111,7 +168,15 @@ def build(out_dir: Path, settings: Settings) -> None:
             return f"{prefix}{target}" if target or prefix else "./"
 
         context = page_context(
-            catalog, simulator, settings, page=page, static_url=static_url, page_url=page_url
+            catalog,
+            simulator,
+            settings,
+            page=page,
+            static_url=static_url,
+            page_url=page_url,
+            published=published,
+            og=og,
+            preset=preset,
         )
         html = env.get_template(template_name).render(context)
         target = out_dir / published / "index.html"
@@ -119,7 +184,8 @@ def build(out_dir: Path, settings: Settings) -> None:
         target.write_text(html, encoding="utf-8")
 
     (out_dir / ".nojekyll").touch()  # GitHub Pages : servir les fichiers tels quels
-    print(f"Site généré dans {out_dir} ({len(PAGES)} pages, {len(catalog.measures)} mesures)")
+    n_scenarios = len(catalog_out.scenarios)
+    print(f"Site généré dans {out_dir} ({len(jobs)} pages dont {n_scenarios} scénarios)")
 
 
 def _digest(path: Path) -> str:

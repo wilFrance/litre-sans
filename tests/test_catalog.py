@@ -52,6 +52,7 @@ measures:
     group: Immigration
     name: Supprimer l'AME
     sponsors: X
+    share_label: sans l'AME
     sources:
       - {label: AN, url: https://example.org/ame}
     variants:

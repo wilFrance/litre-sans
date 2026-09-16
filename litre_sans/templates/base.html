@@ -5,7 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark light">
 <title>{% block title %}{{ settings.site_title }}{% endblock %}</title>
-<meta name="description" content="{% block description %}Combien coûterait le litre de carburant si les économies proposées par les candidats allaient aux taxes sur le carburant ?{% endblock %}">
+<meta name="description" content="{% block description %}{{ og_description }}{% endblock %}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="{{ settings.site_title }}">
+<meta property="og:title" content="{{ og_title }}">
+<meta property="og:description" content="{{ og_description }}">
+<meta property="og:locale" content="fr_FR">
+{% if og_url %}<meta property="og:url" content="{{ og_url }}">{% endif %}
+{% if og_image %}<meta property="og:image" content="{{ og_image }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="{{ og_image }}">{% endif %}
+<meta name="twitter:title" content="{{ og_title }}">
+<meta name="twitter:description" content="{{ og_description }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
@@ -15,7 +28,7 @@
   try { var t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
 </script>
 </head>
-<body data-page="{{ page }}">
+<body data-page="{{ page }}"{% if preset %} data-preset="{{ preset }}"{% endif %}{% if site_url %} data-site-url="{{ site_url }}"{% endif %}>
 <div class="wrap">
   <header class="top">
     <nav aria-label="Navigation principale">

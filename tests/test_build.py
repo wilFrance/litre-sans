@@ -47,9 +47,39 @@ def test_build_with_goatcounter(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
     out = tmp_path / "site"
     build(out, settings)
     pages = list(out.rglob("*.html"))
-    assert len(pages) == 3
+    assert len(pages) == 3 + 8  # pages fixes + une par scénario
     for page in pages:
         html = page.read_text(encoding="utf-8")
         assert 'data-goatcounter="https://mon-site.goatcounter.com/count"' in html, page
         assert 'src="//gc.zgo.at/count.js"' in html, page
     assert "analytics.js?v=" in (out / "index.html").read_text(encoding="utf-8")
+
+
+def test_scenario_pages_and_og(tmp_path: Path) -> None:
+    out = tmp_path / "site"
+    build(out, Settings(site_url="https://example.org/litre-sans", goatcounter_code=""))
+    ame = (out / "s" / "ame" / "index.html").read_text(encoding="utf-8")
+    assert 'data-preset="ame"' in ame
+    assert 'data-site-url="https://example.org/litre-sans/"' in ame
+    assert '<meta property="og:url" content="https://example.org/litre-sans/s/ame/">' in ame
+    og_image = '<meta property="og:image" content="https://example.org/litre-sans/static/og/ame.png">'
+    assert og_image in ame
+    assert "1,27 € de moins sur le plein" in ame
+    assert 'href="../../static/css/style.css?v=' in ame
+    assert 'href="../../methode/"' in ame
+    index = (out / "index.html").read_text(encoding="utf-8")
+    assert 'content="https://example.org/litre-sans/static/og/default.png"' in index
+    assert "data-preset" not in index
+    for sc in json.loads((out / "data" / "measures.json").read_text(encoding="utf-8"))["scenarios"]:
+        img = out / "static" / "og" / f"{sc['id']}.png"
+        assert img.is_file() and img.stat().st_size > 10_000, sc["id"]
+        assert (out / sc["path"] / "index.html").is_file()
+
+
+def test_og_image_dimensions(tmp_path: Path) -> None:
+    from PIL import Image
+
+    out = tmp_path / "site"
+    build(out, Settings(goatcounter_code=""))
+    with Image.open(out / "static" / "og" / "default.png") as img:
+        assert img.size == (1200, 630)

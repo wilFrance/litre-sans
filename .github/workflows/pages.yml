@@ -34,9 +34,14 @@ jobs:
       - name: Python tests (exporte tests/fixtures/cases.json)
         run: uv run pytest
 
+      - name: Configure Pages (URL publique)
+        id: pages
+        uses: actions/configure-pages@v5
+
       - name: Build static site
         env:
           GOATCOUNTER_CODE: ${{ vars.GOATCOUNTER_CODE }}
+          SITE_URL: ${{ steps.pages.outputs.base_url }}/
         run: uv run build-site
 
       - name: Set up Node

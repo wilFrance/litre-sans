@@ -41,6 +41,9 @@ class MeasureVariant(Entity):
         default=0, ge=0, description="Baisse directe du prix TTC, €/L (ex. CEE)"
     )
     badge: Badge
+    share_label: str | None = Field(
+        default=None, description="Remplace le share_label de la mesure pour cette variante"
+    )
 
     @model_validator(mode="after")
     def _has_effect(self) -> Self:
@@ -54,6 +57,9 @@ class Measure(Entity):
     group: str = Field(min_length=1)
     name: str = Field(min_length=1)
     sponsors: str = Field(min_length=1, description="Porteur(s) de la mesure")
+    share_label: str = Field(
+        min_length=1, description="Début de la phrase de partage, ex. « sans l'AME »"
+    )
     note: str = ""
     sources: list[Source] = Field(min_length=1)
     variants: list[MeasureVariant] = Field(min_length=1)

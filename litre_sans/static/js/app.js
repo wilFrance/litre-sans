@@ -27,6 +27,8 @@
 
   function readUrl() {
     const q = new URLSearchParams(location.search);
+    const preset = document.body.dataset.preset;
+    if (preset && !q.has("on") && !q.has("fuel") && BY_ID[preset]) state.on.add(preset);
     if (q.has("fuel") && FUELS[q.get("fuel")]) {
       state.fuel = q.get("fuel");
       state.price = FUELS[state.fuel].reference_price;
@@ -86,9 +88,13 @@
     tankLitres: CATALOG.tank_litres,
   });
 
+  let lastResult = null;
+
   function simulate() {
     try {
-      renderResult(ENGINE.simulate(scenario()));
+      lastResult = ENGINE.simulate(scenario());
+      renderResult(lastResult);
+      $("#shareText").textContent = `« ${shareText()} »`;
       showError("");
     } catch (e) {
       showError(e instanceof LitreSans.DomainError ? e.message : "Erreur de calcul.");
@@ -260,30 +266,75 @@
   window.addEventListener("resize", reserveSpace);
   reserveSpace();
 
-  const SHARE_TEXT = "Et si les économies allaient à la pompe ? Mon scénario :";
+  // ---------- Partage ----------
+  const SITE_URL = document.body.dataset.siteUrl || "";
+  const SCENARIOS = Object.fromEntries(CATALOG.scenarios.map((sc) => [sc.measure_id, sc]));
+  const capitalize = (t) => t.charAt(0).toUpperCase() + t.slice(1);
+
+  // « Sans l'AME, mon plein de 50 L coûterait 1,27 € de moins. Et vous ? »
+  function shareText() {
+    const chosen = MEASURES.filter((m) => state.on.has(m.id));
+    if (!chosen.length || !lastResult || lastResult.tank_saving < 0.005) {
+      return "Et si les économies allaient à la pompe ? Cochez des dépenses publiques à supprimer.";
+    }
+    const labels = chosen.map((m) => {
+      const v = m.variants.find((x) => x.id === state.variant[m.id]);
+      return v.share_label || m.share_label;
+    });
+    let clause;
+    if (labels.length === 1) clause = labels[0];
+    else if (labels.length === 2) clause = `${labels[0]} et ${labels[1]}`;
+    else clause = `${labels[0]}, ${labels[1]} et ${labels.length - 2} autres mesures`;
+    const tank = fmt(lastResult.tank_litres, 0);
+    return `${capitalize(clause)}, mon plein de ${tank} L coûterait ${fmt(lastResult.tank_saving, 2)} € de moins. Et vous ?`;
+  }
+
+  // Adresse à partager : celle du scénario phare si l'état lui correspond exactement
+  // (une mesure, variante par défaut, carburant et prix de référence), sinon l'URL courante.
+  function shareUrl() {
+    if (state.on.size === 1) {
+      const id = [...state.on][0];
+      const sc = SCENARIOS[id];
+      const m = BY_ID[id];
+      const isDefault = state.variant[id] === m.variants.find((v) => v.is_default).id;
+      const refPrice = Math.abs(state.price - FUELS[state.fuel].reference_price) < 1e-9;
+      if (sc && isDefault && refPrice && state.fuel === sc.fuel) {
+        return SITE_URL ? `${SITE_URL}${sc.path}` : new URL(`${rootPrefix()}${sc.path}`, location.href).href;
+      }
+    }
+    return location.href; // sans utm_* : l'URL est réécrite depuis l'état
+  }
+
+  // Préfixe relatif vers la racine du site (les pages de scénario sont dans s/<id>/).
+  function rootPrefix() {
+    return document.body.dataset.preset ? "../../" : "./";
+  }
+
   const shareTargets = {
-    whatsapp: (url) => `https://wa.me/?text=${encodeURIComponent(`${SHARE_TEXT} ${url}`)}`,
-    x: (url) => `https://twitter.com/intent/tweet?text=${encodeURIComponent(SHARE_TEXT)}&url=${encodeURIComponent(url)}`,
-    facebook: (url) => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+    whatsapp: (url, text) => `https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`,
+    x: (url, text) => `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
+    facebook: (url, text) => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`,
+    linkedin: (url) => `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
   };
 
   document.querySelectorAll("[data-share]").forEach((btn) =>
     btn.addEventListener("click", async () => {
       const channel = btn.dataset.share;
-      const url = location.href; // sans utm_* : l'URL est réécrite depuis l'état
+      const url = shareUrl();
+      const text = shareText();
       analytics.track(`partage-${channel}`);
       if (channel === "copie-lien") {
         const msg = $("#shareMsg");
         try {
-          await navigator.clipboard.writeText(url);
-          msg.textContent = "Lien copié.";
+          await navigator.clipboard.writeText(`${text} ${url}`);
+          msg.textContent = "Texte et lien copiés.";
         } catch (e) {
           msg.textContent = url;
         }
         setTimeout(() => { msg.textContent = ""; }, 4000);
         return;
       }
-      window.open(shareTargets[channel](url), "_blank", "noopener");
+      window.open(shareTargets[channel](url, text), "_blank", "noopener");
     })
   );
 

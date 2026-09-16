@@ -12,7 +12,7 @@ from litre_sans.models import (
     MeasureVariant,
     Source,
 )
-from litre_sans.simulator import Simulator
+from litre_sans.simulator import Scenario, SelectedMeasure, Simulator
 
 
 class FuelOut(BaseModel):
@@ -65,6 +65,7 @@ class VariantOut(BaseModel):
     budget_bn: float
     direct_per_litre: float
     badge: BadgeOut
+    share_label: str | None
     is_default: bool
     unit_effect_per_litre: float = Field(
         description="Baisse du prix attribuable, hors plafond (€/L)"
@@ -80,6 +81,7 @@ class VariantOut(BaseModel):
             budget_bn=variant.budget_bn,
             direct_per_litre=variant.direct_per_litre,
             badge=BadgeOut.from_domain(variant.badge),
+            share_label=variant.share_label,
             is_default=variant is measure.default_variant,
             unit_effect_per_litre=simulator.unit_effect(measure, variant),
         )
@@ -92,6 +94,7 @@ class MeasureOut(BaseModel):
     group: str
     name: str
     sponsors: str
+    share_label: str
     note: str
     sources: list[SourceOut]
     variants: list[VariantOut]
@@ -103,9 +106,44 @@ class MeasureOut(BaseModel):
             group=measure.group,
             name=measure.name,
             sponsors=measure.sponsors,
+            share_label=measure.share_label,
             note=measure.note,
             sources=[SourceOut.from_domain(src) for src in measure.sources],
             variants=[VariantOut.from_domain(measure, v, simulator) for v in measure.variants],
+        )
+
+
+class ScenarioOut(BaseModel):
+    """Scénario prêt à l'emploi : une mesure (variante par défaut), prix de référence."""
+
+    model_config = ConfigDict(frozen=True)
+
+    id: str
+    measure_id: str
+    fuel: FuelCode
+    path: str = Field(description="Chemin publié, relatif à la racine du site")
+    title: str
+    price_before: float
+    price_after: float
+    tank_saving: float
+    tank_litres: float
+
+    @classmethod
+    def from_measure(cls, measure: Measure, fuel: Fuel, simulator: Simulator) -> "ScenarioOut":
+        result = simulator.simulate(
+            Scenario(fuel=fuel.code, selections=[SelectedMeasure(measure_id=measure.id)])
+        )
+        label = measure.share_label
+        return cls(
+            id=measure.id,
+            measure_id=measure.id,
+            fuel=fuel.code,
+            path=f"s/{measure.id}/",
+            title=label[0].upper() + label[1:],
+            price_before=result.price_before,
+            price_after=result.price_after,
+            tank_saving=result.tank_saving,
+            tank_litres=result.tank_litres,
         )
 
 
@@ -116,15 +154,18 @@ class CatalogOut(BaseModel):
 
     fuels: list[FuelOut]
     measures: list[MeasureOut]
+    scenarios: list[ScenarioOut]
     litres_billions: float
     vat_rate: float
     tank_litres: float
 
     @classmethod
     def from_domain(cls, catalog: Catalog, simulator: Simulator) -> "CatalogOut":
+        fuel = catalog.fuels[0]
         return cls(
             fuels=[FuelOut.from_domain(f, simulator) for f in catalog.fuels],
             measures=[MeasureOut.from_domain(m, simulator) for m in catalog.measures],
+            scenarios=[ScenarioOut.from_measure(m, fuel, simulator) for m in catalog.measures],
             litres_billions=simulator.litres_billions,
             vat_rate=simulator.vat_rate,
             tank_litres=simulator.tank_litres,

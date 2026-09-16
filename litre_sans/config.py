@@ -21,6 +21,11 @@ class Settings(BaseSettings):
     tank_litres: float = Field(default=50.0, gt=0)
     measures_path: Path = PROJECT_ROOT / "data" / "measures.yaml"
     output_dir: Path = PROJECT_ROOT / "site"
+    site_url: str = Field(
+        default="",
+        validation_alias=AliasChoices("SITE_URL", "LITRE_SANS_SITE_URL"),
+        description="URL publique du site (pour les balises Open Graph), ex. https://x.github.io/y/",
+    )
     goatcounter_code: str = Field(
         default="",
         validation_alias=AliasChoices("GOATCOUNTER_CODE", "LITRE_SANS_GOATCOUNTER_CODE"),
