@@ -15,12 +15,13 @@ fuels:
 measures:
   - id: energie
     group: Énergie
-    name: Supprimer les CEE et les soutiens aux énergies renouvelables
-    sponsors: Bruno Retailleau (CEE, renouvelables « matures »), Sarah Knafo (renouvelables)
+    name: Supprimer les soutiens aux énergies renouvelables
+    sponsors: Sarah Knafo (renouvelables), Bruno Retailleau (renouvelables « matures » et CEE)
     note: >-
-      Les certificats d'économies d'énergie (CEE) sont un coût imposé aux distributeurs, retiré
-      directement du prix : l'Ufip l'estime à 15-17 c/L en 2026. Les soutiens aux renouvelables
-      (7,983 Md€) sont une dépense budgétaire, variable selon les prix de l'électricité.
+      Regroupe deux dispositifs : les soutiens budgétaires aux renouvelables (7,983 Md€ par an,
+      montant variable selon les prix de l'électricité) et les certificats d'économies d'énergie
+      (CEE), un coût imposé aux distributeurs de carburant que l'Ufip estime à 15-17 c/L en 2026
+      et qui est retiré directement du prix.
     sources:
       - label: Public Sénat
         url: https://www.publicsenat.fr/actualites/politique/logement-bruno-retailleau-propose-de-deduire-de-l-imot-les-interets-d-emprunt-pour-un-pret-immobilier-en-fonction-du-nombre-d-enfants
@@ -28,7 +29,7 @@ measures:
         url: https://www.bvoltaire.fr/budget-2026-sarah-knafo-detaille-63-milliards-deuros-deconomies/
     variants:
       - id: default
-        label: 7,983 Md€ par an + 0,15 €/L
+        label: 7,983 Md€ par an (renouvelables) + 0,15 €/L (CEE)
         budget_bn: 7.983
         direct_per_litre: 0.15
         badge: { level: warn, label: Chiffrage des candidats }
@@ -57,9 +58,11 @@ measures:
 
   - id: ame
     group: Immigration
-    name: Supprimer l'aide médicale d'État (AME)
+    name: Supprimer l'aide médicale d'État (AME) pour les personnes en situation irrégulière
     sponsors: Sarah Knafo
-    note: Obstacle constitutionnel possible.
+    note: >-
+      L'AME prend en charge les soins des étrangers en situation irrégulière résidant en France
+      depuis plus de trois mois. Obstacle constitutionnel possible.
     sources:
       - label: Assemblée nationale
         url: https://www.assemblee-nationale.fr/dyn/17/amendements/1906C/CION_FIN/CF1164.pdf
@@ -71,7 +74,7 @@ measures:
 
   - id: pnc
     group: Immigration
-    name: Supprimer les aides non contributives aux étrangers
+    name: Supprimer les aides non contributives aux étrangers (APL, allocations de la CAF, RSA…)
     sponsors: Sarah Knafo ; version restreinte au RN
     note: Réserver des prestations aux Français est jugé contraire à la Constitution en l'état.
     sources:
