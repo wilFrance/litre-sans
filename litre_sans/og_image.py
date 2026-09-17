@@ -88,18 +88,3 @@ def render_scenario(
         d.text((60, y), line, font=font, fill=INK)
         y += 48
     return img
-
-
-def render_default(*, site_title: str, tagline: str) -> Image.Image:
-    img = Image.new("RGB", SIZE, BG)
-    d = ImageDraw.Draw(img)
-    d.rounded_rectangle((60, 60, 1140, 570), radius=18, fill=DISPLAY, outline=PUMP, width=5)
-    d.text(
-        (600, 220), site_title, font=_font("BarlowCondensed-Bold", 120), fill=DIGITS, anchor="mm"
-    )
-    font = _font("Barlow-Regular", 36)
-    y = 330
-    for line in _wrap(d, tagline, font, 980)[:3]:
-        d.text((600, y), line, font=font, fill=INK, anchor="ma")
-        y += 50
-    return img

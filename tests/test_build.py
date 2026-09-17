@@ -62,7 +62,9 @@ def test_scenario_pages_and_og(tmp_path: Path) -> None:
     assert 'data-preset="ame"' in ame
     assert 'data-site-url="https://example.org/litre-sans/"' in ame
     assert '<meta property="og:url" content="https://example.org/litre-sans/s/ame/">' in ame
-    og_image = '<meta property="og:image" content="https://example.org/litre-sans/static/og/ame.png">'
+    og_image = (
+        '<meta property="og:image" content="https://example.org/litre-sans/static/og/ame.png">'
+    )
     assert og_image in ame
     assert "1,27 € de moins sur le plein" in ame
     assert 'href="../../static/css/style.css?v=' in ame
@@ -70,6 +72,9 @@ def test_scenario_pages_and_og(tmp_path: Path) -> None:
     index = (out / "index.html").read_text(encoding="utf-8")
     assert 'content="https://example.org/litre-sans/static/og/default.png"' in index
     assert "data-preset" not in index
+    # Carte générique : le prix plancher (toutes mesures cochées), pas seulement le nom du site
+    assert "Le litre de gazole à 1,24 €, c&#39;est possible. Voici comment !" in index
+    assert "Aujourd&#39;hui 2,36 €" in index
     for sc in json.loads((out / "data" / "measures.json").read_text(encoding="utf-8"))["scenarios"]:
         img = out / "static" / "og" / f"{sc['id']}.png"
         assert img.is_file() and img.stat().st_size > 10_000, sc["id"]

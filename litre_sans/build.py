@@ -16,8 +16,8 @@ from litre_sans.catalog import load_catalog
 from litre_sans.config import Settings
 from litre_sans.export import CatalogOut
 from litre_sans.models import Catalog
-from litre_sans.og_image import render_default, render_scenario
-from litre_sans.simulator import Simulator
+from litre_sans.og_image import render_scenario
+from litre_sans.simulator import Scenario, SelectedMeasure, Simulator
 
 PACKAGE_DIR = Path(__file__).resolve().parent
 TEMPLATES_DIR = PACKAGE_DIR / "templates"
@@ -87,6 +87,29 @@ def _fr_money(value: float) -> str:
     return f"{value:.2f}".replace(".", ",")
 
 
+def floor_og(catalog: Catalog, simulator: Simulator) -> tuple[dict[str, str], Any]:
+    """Aperçu générique : le prix plancher (toutes les mesures cochées, variantes par défaut).
+
+    Les URL personnalisées (plusieurs mesures) n'ont pas de page dédiée ; leur carte de partage
+    doit quand même donner envie de cliquer, avec un chiffre issu du moteur.
+    """
+    fuel = catalog.fuels[0]
+    selections = [SelectedMeasure(measure_id=m.id) for m in catalog.measures]
+    result = simulator.simulate(Scenario(fuel=fuel.code, selections=selections))
+    og = {
+        "title": (
+            f"Le litre de {fuel.label.lower()} à {_fr_money(result.price_after)} €, "
+            "c'est possible. Voici comment !"
+        ),
+        "description": (
+            f"Aujourd'hui {_fr_money(result.price_before)} €. {TAGLINE} "
+            "Composez votre scénario et partagez-le."
+        ),
+        "image": "static/og/default.png",
+    }
+    return og, result
+
+
 def build(out_dir: Path, settings: Settings) -> None:
     catalog = load_catalog(settings.measures_path)
     simulator = Simulator(
@@ -115,8 +138,17 @@ def build(out_dir: Path, settings: Settings) -> None:
     # Images d'aperçu Open Graph : une par scénario phare + une générique
     og_dir = out_dir / "static" / "og"
     og_dir.mkdir()
-    render_default(site_title=settings.site_title, tagline=TAGLINE).save(og_dir / "default.png")
     fuel_label = catalog.fuels[0].label
+    default_og, floor = floor_og(catalog, simulator)
+    render_scenario(
+        title=default_og["title"],
+        price_before=floor.price_before,
+        price_after=floor.price_after,
+        tank_saving=floor.tank_saving,
+        tank_litres=floor.tank_litres,
+        fuel_label=fuel_label,
+        site_title=settings.site_title,
+    ).save(og_dir / "default.png")
     for sc in catalog_out.scenarios:
         render_scenario(
             title=f"{sc.title} : {_fr_money(sc.tank_saving)} € de moins sur le plein",
@@ -142,7 +174,7 @@ def build(out_dir: Path, settings: Settings) -> None:
 
     # Pages fixes + une page par scénario phare (même simulateur, mesure pré-cochée)
     jobs: list[tuple[str, str, str, dict[str, str], str]] = [
-        (page, template, published, {}, "") for page, (template, published) in PAGES.items()
+        (page, template, published, default_og, "") for page, (template, published) in PAGES.items()
     ]
     for sc in catalog_out.scenarios:
         og = {
