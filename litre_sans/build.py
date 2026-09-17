@@ -149,6 +149,10 @@ def build(out_dir: Path, settings: Settings) -> None:
         fuel_label=fuel_label,
         site_title=settings.site_title,
     ).save(og_dir / "default.png")
+    # Empreinte en query string : X et Facebook mémorisent une carte par URL d'image, une image
+    # modifiée (ou lue pendant un déploiement) ne doit pas être resservie depuis leur cache.
+    og_image_url = lambda name: f"static/og/{name}.png?v={_digest(og_dir / f'{name}.png')}"  # noqa: E731
+    default_og["image"] = og_image_url("default")
     for sc in catalog_out.scenarios:
         render_scenario(
             title=f"{sc.title} : {_fr_money(sc.tank_saving)} € de moins sur le plein",
@@ -183,7 +187,7 @@ def build(out_dir: Path, settings: Settings) -> None:
                 f"Le litre de {fuel_label.lower()} passerait de {_fr_money(sc.price_before)} € à "
                 f"{_fr_money(sc.price_after)} €. Et vous, que supprimeriez-vous ?"
             ),
-            "image": f"static/og/{sc.id}.png",
+            "image": og_image_url(sc.id),
         }
         jobs.append(("index", "index.html", sc.path, og, sc.measure_id))
 
